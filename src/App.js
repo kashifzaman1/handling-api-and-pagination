@@ -83,6 +83,14 @@ setPhoto([]);
     getBrand();
   }, []);
 
+  function deleteP(x){
+    fetch(`https://dummyjson.com/products/${x+1}`, {
+  method: 'DELETE',
+})
+.then(res => res.json())
+.then(setBrand(sbrand.splice(x,1)));
+console.log(sbrand);
+  }
   
   return (
     <>
@@ -128,7 +136,7 @@ setPhoto([]);
               <button className=" bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                 Add to cart
               </button>
-              <button className="bg-green-600 hover:bg-green-700 text-white ml-2 font-bold py-2 px-4 rounded">
+              <button className="bg-green-600 hover:bg-green-700 text-white ml-1 font-bold py-2 px-4 rounded" onClick={()=>deleteP(index)}>
                 Delete
               </button>
             </div>
