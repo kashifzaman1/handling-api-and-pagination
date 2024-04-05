@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import './App.css';
 
 function App() {
   const [price, setPrice] = useState('');
   const [title, setTitle] = useState("");
   const [brand, setBrand] = useState("");
-  const [images, setPhoto] = useState([]);
-  
+  const [images, setPhoto] = useState('');
+  const inputFile = useRef(null);
+
   const [subp,setsubp]=useState(true);
   const [userid,setuserid]=useState(0);
 
   const [sbrand, setsBrand] = useState([]);
   const [page, setPage] = useState(0);
   const [loading, setloading] = useState(false);
-  const [update, setupdate] = useState(false);
 
   const getBrand = () => {
     setloading(true);
@@ -64,7 +64,7 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setloading(true);
-    if(price==''&title==''&brand==''&images.files==[]){
+    if(price==''||title==''||brand==''||images==''){
       window.alert('Please fill all fields')
     }
     else{
@@ -72,21 +72,24 @@ function App() {
   method: 'POST', /* or PATCH */
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    price,title,brand,images
+    price,title,brand,images:window.URL.createObjectURL(images).split(' ')
   })
 })
 .then(res => res.json())
-.then(data=>setBrand(sbrand.push(data)));
-setPhoto([]);
+.then(data=>{
+  setBrand(sbrand.push(data));
+  setBrand('');           
+            }
+              );
+
+    }
+    console.log(sbrand);
+    inputFile.current.value = "";
 setPrice('');
 setTitle('');
-setBrand('');
-    }
+
 setloading(false);
 };
-  useEffect(() => {
-    getBrand();
-  }, []);
 
   function deleteP(x){
     setBrand(sbrand.splice(x,1));
@@ -94,7 +97,6 @@ setloading(false);
   
   function editP(y){
     setuserid(y);
-    setPhoto([]);
     setPrice(sbrand[y].price);
     setTitle(sbrand[y].title);
     setBrand(sbrand[y].brand);
@@ -111,11 +113,12 @@ setloading(false);
   })
 })
 .then(res => res.json())
-.then(data=>setBrand(sbrand.splice(userid,1,data)));
-setPhoto([]);
+.then(data=>{setBrand(sbrand.splice(userid,1,data));
+setBrand('')}
+              );
 setPrice('');
 setTitle('');
-setBrand('');
+
 setuserid(0);
 setsubp(true);
   }
@@ -138,7 +141,7 @@ setsubp(true);
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-black dark:text-black" htmlFor="file_input">Upload file</label>
-            <input className="block w-full text-sm text-gray-900  rounded-lg p-2 cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file" required value={images.files} onChange={(e) => images.push(e.target.files[0].name)}/>
+            <input className="block w-full text-sm text-gray-900  rounded-lg p-2 cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file" required ref={inputFile} onChange={(e) => setPhoto(e.target.files[0])}/>
           </div>
           {subp? <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleSubmit}>Submit</button> : 
           <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleUpdate}>Update</button>}
