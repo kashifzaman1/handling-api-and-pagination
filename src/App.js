@@ -6,7 +6,6 @@ function App() {
   const [title, setTitle] = useState("");
   const [brand, setBrand] = useState("");
   const [images, setPhoto] = useState([]);
-  console.log(images);
   
   const [subp,setsubp]=useState(true);
   const [userid,setuserid]=useState(0);
@@ -23,7 +22,6 @@ function App() {
       .then(data => {
 
         setsBrand(data.products);
-        console.log(sbrand);
         setloading(false);
       })
   };
@@ -70,7 +68,6 @@ function App() {
       window.alert('Please fill all fields')
     }
     else{
-    console.log(price,title,brand,images);
     fetch('https://dummyjson.com/products/add', {
   method: 'POST', /* or PATCH */
   headers: { 'Content-Type': 'application/json' },
@@ -80,7 +77,6 @@ function App() {
 })
 .then(res => res.json())
 .then(data=>setBrand(sbrand.push(data)));
-console.log(sbrand);
 setPhoto([]);
 setPrice('');
 setTitle('');
@@ -94,7 +90,6 @@ setloading(false);
 
   function deleteP(x){
     setBrand(sbrand.splice(x,1));
-console.log(sbrand);
   }
   
   function editP(y){
@@ -122,6 +117,7 @@ setPrice('');
 setTitle('');
 setBrand('');
 setuserid(0);
+setsubp(true);
   }
 
   return (
@@ -157,7 +153,7 @@ setuserid(0);
         {sbrand?.map((list, index) => { 
         return (
         <>
-        <div className="w-1/5 overflow-hidden border" key={index}>
+        <div className="w-1/5 overflow-hidden border py-3" key={index}>
           <div className="relative ">
             <img className="w-auto h-32 mx-auto" src={list.images[0]} alt="Product Image" />
           </div>
