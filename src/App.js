@@ -2,16 +2,19 @@ import { useState, useEffect } from "react";
 import './App.css';
 
 function App() {
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState('');
   const [title, setTitle] = useState("");
   const [brand, setBrand] = useState("");
   const [images, setPhoto] = useState([]);
   console.log(images);
   
-  
+  const [subp,setsubp]=useState(true);
+  const [userid,setuserid]=useState(0);
+
   const [sbrand, setsBrand] = useState([]);
   const [page, setPage] = useState(0);
   const [loading, setloading] = useState(false);
+  const [update, setupdate] = useState(false);
 
   const getBrand = () => {
     setloading(true);
@@ -62,7 +65,8 @@ function App() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if(price==''&title==''&brand==''&images==''){
+    setloading(true);
+    if(price==''&title==''&brand==''&images.files==[]){
       window.alert('Please fill all fields')
     }
     else{
@@ -78,41 +82,72 @@ function App() {
 .then(data=>setBrand(sbrand.push(data)));
 console.log(sbrand);
 setPhoto([]);
-}};
+setPrice('');
+setTitle('');
+setBrand('');
+    }
+setloading(false);
+};
   useEffect(() => {
     getBrand();
   }, []);
 
   function deleteP(x){
-    fetch(`https://dummyjson.com/products/${x+1}`, {
-  method: 'DELETE',
-})
-.then(res => res.json())
-.then(setBrand(sbrand.splice(x,1)));
+    setBrand(sbrand.splice(x,1));
 console.log(sbrand);
   }
   
+  function editP(y){
+    setuserid(y);
+    setPhoto([]);
+    setPrice(sbrand[y].price);
+    setTitle(sbrand[y].title);
+    setBrand(sbrand[y].brand);
+    setsubp(false);
+  }
+
+  const handleUpdate=(e)=>{
+    e.preventDefault();
+    fetch(`https://dummyjson.com/products/${userid+1}`, {
+  method: 'PUT', /* or PATCH */
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    price,title,brand,images
+  })
+})
+.then(res => res.json())
+.then(data=>setBrand(sbrand.splice(userid,1,data)));
+setPhoto([]);
+setPrice('');
+setTitle('');
+setBrand('');
+setuserid(0);
+  }
+
   return (
     <>
       <div className="mb-10">
         <form className="max-w-sm mx-auto">
           <div className="mb-5">
             <label htmlFor="price" className="block mb-2 text-sm font-medium text-gray-900 dark:text-black">Product Price: </label>
-            <input type="number" id="price" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" required onChange={(e) => setPrice(e.target.value)}/>
+            <input type="number" id="price" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" value={price} required onChange={(e) => setPrice(e.target.value)}/>
           </div>
           <div className="mb-5">
             <label htmlFor="title" className="block mb-2 text-sm font-medium text-gray-900 dark:text-black">Product Title: </label>
-            <input type="text" id="title" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" required onChange={(e) => setTitle(e.target.value)}/>
+            <input type="text" id="title" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" value={title} required onChange={(e) => setTitle(e.target.value)}/>
           </div>
           <div className="mb-5">
             <label htmlFor="brand" className="block mb-2 text-sm font-medium text-gray-900 dark:text-black">Product brand</label>
-            <input type="text" id="brand" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" required onChange={(e) => setBrand(e.target.value)}/>
+            <input type="text" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" required value={brand} onChange={(e) => setBrand(e.target.value)}/>
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-black dark:text-black" htmlFor="file_input">Upload file</label>
-            <input className="block w-full text-sm text-gray-900  rounded-lg p-2 cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file" required onChange={(e) => images.push(e.target.files[0].name)}/>
+            <input className="block w-full text-sm text-gray-900  rounded-lg p-2 cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none  dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file" required value={images.files} onChange={(e) => images.push(e.target.files[0].name)}/>
           </div>
-          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleSubmit}>Submit</button>
+          {subp? <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleSubmit}>Submit</button> : 
+          <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleUpdate}>Update</button>}
+          
+          
         </form>
       </div>
   
@@ -132,11 +167,14 @@ console.log(sbrand);
             <p className="text-gray-600 text-sm mb-8">{list.brand}</p>
             </div>
             </div>
-            <div className="flex px-4 mb-5">
-              <button className=" bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            <div className="px-4 w-full mb-2">
+              <button className=" bg-green-600 hover:bg-green-700 text-white font-bold w-full py-2 px-4 rounded">
                 Add to cart
               </button>
-              <button className="bg-green-600 hover:bg-green-700 text-white ml-1 font-bold py-2 px-4 rounded" onClick={()=>deleteP(index)}>
+            </div>
+            <div className="flex mb-2 px-2">
+              <button className="bg-green-600 hover:bg-green-700 text-white ml-1 font-bold py-2 px-4 rounded w-1/2" onClick={()=>editP(index)}>Edit</button>
+              <button className="bg-red-600 hover:bg-red-700 text-white ml-1 font-bold py-2 px-4 rounded w-1/2" onClick={()=>deleteP(index)}>
                 Delete
               </button>
             </div>
